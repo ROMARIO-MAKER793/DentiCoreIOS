@@ -87,10 +87,31 @@ class LoginViewController: UIViewController {
                     LoginResponse.self,
                     from: data
                 )
+                
+                print("ENTRÓ AL LOGIN RESPONSE")
+
+                UserDefaults.standard.set(
+                    loginResponse.token,
+                    forKey: "jwtToken"
+                )
+
+                print(
+                    "TOKEN GUARDADO:",
+                    UserDefaults.standard.string(forKey: "jwtToken") ?? "NO GUARDADO"
+                )
 
                 print("LOGIN CORRECTO")
                 print("ROL: \(loginResponse.rol)")
                 print("TOKEN: \(loginResponse.token)")
+                
+                DispatchQueue.main.async {
+                    if loginResponse.rol == "PACIENTE" {
+                        self.performSegue(
+                            withIdentifier: "irAHomePaciente",
+                            sender: dni
+                        )
+                    }
+                }
 
             } catch {
                 print("Error al leer respuesta: \(error)")
@@ -103,6 +124,15 @@ class LoginViewController: UIViewController {
         }.resume()
     }
     
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "irAHomePaciente",
+           let homePaciente = segue.destination as? PacienteHomeViewController,
+           let dni = sender as? String {
+
+            homePaciente.dniPaciente = dni
+        }
+    }
     
     @IBAction func btnCancelar(_ sender: Any) {
         textFieldDNI.text = ""
